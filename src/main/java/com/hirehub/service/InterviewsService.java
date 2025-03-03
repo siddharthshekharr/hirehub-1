@@ -85,4 +85,14 @@ public class InterviewsService {
     public List<Interviews> getAllInterviews() {
         return interviewsDAO.getAll();
     }
+
+    /**
+     * Retrieves all interviews for a specific application
+     * 
+     * @param applicationID The ID of the application to get interviews for
+     * @return A list of interviews for the specified application
+     */
+    public List<Interviews> getInterviewsByApplicationID(int applicationID) {
+        return interviewsDAO.getByApplicationID(applicationID);
+    }
 }

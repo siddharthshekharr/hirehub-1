@@ -112,6 +112,26 @@ public class InterviewsDAOImpl implements InterviewsDAO {
         return interviewsList;
     }
 
+    @Override
+    public List<Interviews> getByApplicationID(int applicationID) {
+        List<Interviews> interviewsList = new ArrayList<>();
+        String sql = "SELECT * FROM interviews WHERE application_id = ?";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setInt(1, applicationID);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                interviewsList.add(extractInterviewFromResultSet(rs));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return interviewsList;
+    }
+
     // Helper method to convert a ResultSet row into an Interviews object
     private Interviews extractInterviewFromResultSet(ResultSet rs) throws SQLException {
         Interviews interview = new Interviews();

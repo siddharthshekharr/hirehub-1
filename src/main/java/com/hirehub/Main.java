@@ -196,7 +196,8 @@ public class Main {
             System.out.println("3. Update Interviews");
             System.out.println("4. Delete Interview");
             System.out.println("5. Find Interview");
-            System.out.println("6. Return to Main Menu");
+            System.out.println("6. View Interviews by Application ID");
+            System.out.println("7. Return to Main Menu");
 
             int choice = getIntInput("Enter your choice: ");
             try {
@@ -206,7 +207,8 @@ public class Main {
                     case 3 -> updateInterview();
                     case 4 -> deleteInterview();
                     case 5 -> findInterview();
-                    case 6 -> {
+                    case 6 -> viewInterviewsByApplicationID();
+                    case 7 -> {
                         return;
                     } // Exit interview management
                     default -> System.out.println("Invalid choice. Please try again.");
@@ -668,22 +670,225 @@ public class Main {
     // User logic
 
     private static void createUser() {
+        System.out.println("\n=== Create New User ===");
 
+        // Get username
+        String username = getStringInput("Enter Username: ");
+
+        // Get password
+        String password = getStringInput("Enter Password: ");
+
+        // Get email
+        String email = getStringInput("Enter Email: ");
+
+        // Get first name
+        String firstName = getStringInput("Enter First Name: ");
+
+        // Get last name
+        String lastName = getStringInput("Enter Last Name: ");
+
+        // Get role
+        System.out.println("Select User Role:");
+        System.out.println("1. ADMIN");
+        System.out.println("2. RECRUITER");
+        System.out.println("3. HIRING_MANAGER");
+        System.out.println("4. INTERVIEWER");
+
+        int roleChoice = getIntInput("Enter your choice: ");
+        String role;
+
+        switch (roleChoice) {
+            case 1 -> role = "ADMIN";
+            case 2 -> role = "RECRUITER";
+            case 3 -> role = "HIRING_MANAGER";
+            case 4 -> role = "INTERVIEWER";
+            default -> {
+                System.out.println("Invalid choice. Setting role to RECRUITER.");
+                role = "RECRUITER";
+            }
+        }
+
+        // Create the user object
+        try {
+            Users user = new Users(0, username, password, email, role, firstName, lastName);
+
+            boolean success = userService.createUser(user);
+
+            if (success) {
+                System.out.println("User created successfully with ID: " + user.getuserId());
+            } else {
+                System.out.println("Failed to create user. Please check your input.");
+            }
+        } catch (Exception e) {
+            System.out.println("Error creating user: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private static void viewAllUsers() {
+        System.out.println("\n=== All Users ===");
 
+        List<Users> users = userService.getAllUsers();
+
+        if (users.isEmpty()) {
+            System.out.println("No users found.");
+            return;
+        }
+
+        System.out.println("ID | Username | Email | Role | Name");
+        System.out.println("--------------------------------------------------");
+
+        for (Users user : users) {
+            System.out.printf("%d | %s | %s | %s | %s %s%n",
+                    user.getuserId(),
+                    user.getuserName(),
+                    user.getemail(),
+                    user.getrole(),
+                    user.getFirstName(),
+                    user.getLastName());
+        }
     }
 
     private static void updateUser() {
+        System.out.println("\n=== Update User ===");
 
+        int userId = getIntInput("Enter User ID to update: ");
+
+        // Retrieve the user
+        Users user = userService.getUserById(userId);
+
+        if (user == null) {
+            System.out.println("User not found with ID: " + userId);
+            return;
+        }
+
+        System.out.println("Current User Details:");
+        System.out.printf("ID: %d | Username: %s | Email: %s | Role: %s | Name: %s %s%n",
+                user.getuserId(),
+                user.getuserName(),
+                user.getemail(),
+                user.getrole(),
+                user.getFirstName(),
+                user.getLastName());
+
+        // Update username
+        System.out.println("Enter new Username (or press Enter to keep current): ");
+        String username = getStringInput("");
+        if (!username.isEmpty()) {
+            user.setuserName(username);
+        }
+
+        // Update password
+        System.out.println("Enter new Password (or press Enter to keep current): ");
+        String password = getStringInput("");
+        if (!password.isEmpty()) {
+            user.setpassword(password);
+        }
+
+        // Update email
+        System.out.println("Enter new Email (or press Enter to keep current): ");
+        String email = getStringInput("");
+        if (!email.isEmpty()) {
+            user.setemail(email);
+        }
+
+        // Update first name
+        System.out.println("Enter new First Name (or press Enter to keep current): ");
+        String firstName = getStringInput("");
+        if (!firstName.isEmpty()) {
+            user.setFirstName(firstName);
+        }
+
+        // Update last name
+        System.out.println("Enter new Last Name (or press Enter to keep current): ");
+        String lastName = getStringInput("");
+        if (!lastName.isEmpty()) {
+            user.setLastName(lastName);
+        }
+
+        // Update role
+        System.out.println("Select new User Role (or press Enter to keep current):");
+        System.out.println("1. ADMIN");
+        System.out.println("2. RECRUITER");
+        System.out.println("3. HIRING_MANAGER");
+        System.out.println("4. INTERVIEWER");
+        System.out.println("5. Keep current role");
+
+        int roleChoice = getIntInput("Enter your choice: ");
+
+        if (roleChoice >= 1 && roleChoice <= 4) {
+            String role;
+            switch (roleChoice) {
+                case 1 -> role = "ADMIN";
+                case 2 -> role = "RECRUITER";
+                case 3 -> role = "HIRING_MANAGER";
+                case 4 -> role = "INTERVIEWER";
+                default -> role = user.getrole();
+            }
+            user.setrole(role);
+        }
+
+        // Update the user
+        try {
+            boolean success = userService.updateUser(user);
+
+            if (success) {
+                System.out.println("User updated successfully.");
+            } else {
+                System.out.println("Failed to update user. Please check your input.");
+            }
+        } catch (Exception e) {
+            System.out.println("Error updating user: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private static void deleteUser() {
+        System.out.println("\n=== Delete User ===");
 
+        int userId = getIntInput("Enter User ID to delete: ");
+
+        // Confirm deletion
+        System.out.println("Are you sure you want to delete this user? (y/n): ");
+        String confirm = getStringInput("");
+
+        if (confirm.equalsIgnoreCase("y")) {
+            try {
+                boolean success = userService.deleteUser(userId);
+
+                if (success) {
+                    System.out.println("User deleted successfully.");
+                } else {
+                    System.out.println(
+                            "Failed to delete user. The user may not exist or there might be related records.");
+                }
+            } catch (Exception e) {
+                System.out.println("Error deleting user: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Deletion cancelled.");
+        }
     }
 
     private static void findUserById() {
+        System.out.println("\n=== Find User ===");
+
+        int userId = getIntInput("Enter User ID to find: ");
+
+        Users user = userService.getUserById(userId);
+
+        if (user == null) {
+            System.out.println("User not found with ID: " + userId);
+            return;
+        }
+
+        System.out.println("User Details:");
+        System.out.printf("ID: %d%n", user.getuserId());
+        System.out.printf("Username: %s%n", user.getuserName());
+        System.out.printf("Email: %s%n", user.getemail());
+        System.out.printf("Role: %s%n", user.getrole());
+        System.out.printf("Name: %s %s%n", user.getFirstName(), user.getLastName());
     }
 
     // Interview logic
@@ -693,6 +898,21 @@ public class Main {
 
         // Get application ID
         int applicationId = getIntInput("Enter Application ID: ");
+
+        // Check if the application exists
+        Applications application = applicationService.getApplicationById(applicationId);
+        if (application == null) {
+            System.out.println("Application not found with ID: " + applicationId);
+            return;
+        }
+
+        // Display application details
+        System.out.println("Application Details:");
+        System.out.printf("ID: %d | Candidate ID: %d | Job ID: %d | Status: %s%n",
+                application.getapplicationID(),
+                application.getcandidateID(),
+                application.getjobID(),
+                application.getStatus());
 
         // Get interview date
         System.out.println("Enter Interview Date (format: YYYY-MM-DD): ");
@@ -717,6 +937,13 @@ public class Main {
 
             calendar.set(year, month, day, hour, minute, 0);
             interviewDate = calendar.getTime();
+
+            // Validate that the interview date is in the future
+            Date now = new Date();
+            if (interviewDate.before(now)) {
+                System.out.println("Interview date must be in the future. Please try again.");
+                return;
+            }
         } catch (Exception e) {
             System.out.println("Invalid date or time format. Please try again.");
             return;
@@ -750,6 +977,13 @@ public class Main {
         try {
             Interviews interview = interviewsService.createInterview(applicationId, interviewDate, feedback, status);
             System.out.println("Interview created successfully with ID: " + interview.getinterviewID());
+
+            // Update application status to INTERVIEWING if it's not already
+            if (!application.getStatus().name().equals(Enums.applicationStatus.INTERVIEWING.name())) {
+                application.setstatus(Enums.applicationStatus.INTERVIEWING);
+                applicationService.updateApplication(application);
+                System.out.println("Application status updated to INTERVIEWING.");
+            }
         } catch (Exception e) {
             System.out.println("Error creating interview: " + e.getMessage());
             e.printStackTrace();
@@ -792,6 +1026,15 @@ public class Main {
             return;
         }
 
+        // Get the application
+        int applicationId = interview.getapplicationID();
+        Applications application = applicationService.getApplicationById(applicationId);
+
+        if (application == null) {
+            System.out.println("Associated application not found with ID: " + applicationId);
+            return;
+        }
+
         System.out.println("Current Interview Details:");
         System.out.printf("ID: %d | Application ID: %d | Date: %s | Status: %s | Feedback: %s%n",
                 interview.getinterviewID(),
@@ -805,8 +1048,16 @@ public class Main {
         String applicationIdStr = getStringInput("");
         if (!applicationIdStr.isEmpty()) {
             try {
-                int applicationId = Integer.parseInt(applicationIdStr);
-                interview.setapplicationID(applicationId);
+                int newApplicationId = Integer.parseInt(applicationIdStr);
+                // Check if the new application exists
+                Applications newApplication = applicationService.getApplicationById(newApplicationId);
+                if (newApplication == null) {
+                    System.out.println("Application not found with ID: " + newApplicationId);
+                    System.out.println("Keeping current application ID.");
+                } else {
+                    interview.setapplicationID(newApplicationId);
+                    application = newApplication; // Update the application reference
+                }
             } catch (NumberFormatException e) {
                 System.out.println("Invalid application ID. Keeping current value.");
             }
@@ -847,6 +1098,9 @@ public class Main {
             interview.setfeedback(feedback);
         }
 
+        // Store the previous status for comparison
+        Enums.interviewStatus previousStatus = interview.getstatus();
+
         // Update status
         System.out.println("Select new Interview Status (or press Enter to keep current):");
         System.out.println("1. SCHEDULED");
@@ -874,6 +1128,37 @@ public class Main {
 
         if (success) {
             System.out.println("Interview updated successfully.");
+
+            // Check if the status changed to COMPLETED
+            if (previousStatus != Enums.interviewStatus.COMPLETED &&
+                    interview.getstatus() == Enums.interviewStatus.COMPLETED) {
+
+                // Ask if the candidate should move to the next stage
+                System.out.println("Interview marked as COMPLETED. Would you like to update the application status?");
+                System.out.println("1. Move to OFFERED stage");
+                System.out.println("2. Keep as INTERVIEWING");
+                System.out.println("3. Reject candidate");
+
+                int nextStageChoice = getIntInput("Enter your choice: ");
+
+                switch (nextStageChoice) {
+                    case 1 -> {
+                        application.setstatus(Enums.applicationStatus.OFFERED);
+                        applicationService.updateApplication(application);
+                        System.out.println("Application status updated to OFFERED.");
+                    }
+                    case 2 -> {
+                        // Keep as INTERVIEWING - no change needed
+                        System.out.println("Application status remains as INTERVIEWING.");
+                    }
+                    case 3 -> {
+                        application.setstatus(Enums.applicationStatus.REJECTED);
+                        applicationService.updateApplication(application);
+                        System.out.println("Application status updated to REJECTED.");
+                    }
+                    default -> System.out.println("Invalid choice. Application status remains unchanged.");
+                }
+            }
         } else {
             System.out.println("Failed to update interview.");
         }
@@ -913,12 +1198,73 @@ public class Main {
             return;
         }
 
-        System.out.println("Interview Details:");
-        System.out.printf("ID: %d%n", interview.getinterviewID());
-        System.out.printf("Application ID: %d%n", interview.getapplicationID());
-        System.out.printf("Date: %s%n", interview.getinterviewDate());
-        System.out.printf("Status: %s%n", interview.getstatus());
-        System.out.printf("Feedback: %s%n", interview.getfeedback() != null ? interview.getfeedback() : "N/A");
+        // Get the application
+        int applicationId = interview.getapplicationID();
+        Applications application = applicationService.getApplicationById(applicationId);
+
+        if (application == null) {
+            System.out.println("Associated application not found with ID: " + applicationId);
+        }
+
+        System.out.println("\n=== Interview Details ===");
+        System.out.println("Interview ID: " + interview.getinterviewID());
+        System.out.println("Application ID: " + interview.getapplicationID());
+        System.out.println("Interview Date: " + interview.getinterviewDate());
+        System.out.println("Status: " + interview.getstatus());
+        System.out.println("Feedback: " + (interview.getfeedback() != null ? interview.getfeedback() : "N/A"));
+
+        // Display application details if available
+        if (application != null) {
+            System.out.println("\n=== Associated Application Details ===");
+            System.out.println("Application ID: " + application.getapplicationID());
+            System.out.println("Candidate ID: " + application.getcandidateID());
+            System.out.println("Job ID: " + application.getjobID());
+            System.out.println("Application Date: " + application.getapplicationDate());
+            System.out.println("Status: " + application.getStatus());
+
+            // Get candidate details
+            Candidates candidate = candidateService.getCandidateById(application.getcandidateID());
+            if (candidate != null) {
+                System.out.println("\n=== Candidate Details ===");
+                System.out.println("Name: " + candidate.getfirstName() + " " + candidate.getlastName());
+                System.out.println("Email: " + candidate.getemailAddress());
+                System.out.println("Phone: " + candidate.getphoneNumber());
+            }
+
+            // Get job details
+            Job job = jobService.getJobById(application.getjobID());
+            if (job != null) {
+                System.out.println("\n=== Job Details ===");
+                System.out.println("Title: " + job.getTitle());
+                System.out.println("Description: " + job.getDescription());
+                System.out.println("Requirements: " + job.getRequirements());
+            }
+        }
+    }
+
+    private static void viewInterviewsByApplicationID() {
+        System.out.println("\n=== View Interviews by Application ID ===");
+
+        int applicationId = getIntInput("Enter Application ID: ");
+
+        List<Interviews> interviews = interviewsService.getInterviewsByApplicationID(applicationId);
+
+        if (interviews.isEmpty()) {
+            System.out.println("No interviews found for Application ID: " + applicationId);
+            return;
+        }
+
+        System.out.println("Interviews for Application ID: " + applicationId);
+        System.out.println("ID | Date | Status | Feedback");
+        System.out.println("--------------------------------------------------");
+
+        for (Interviews interview : interviews) {
+            System.out.printf("%d | %s | %s | %s%n",
+                    interview.getinterviewID(),
+                    interview.getinterviewDate(),
+                    interview.getstatus(),
+                    interview.getfeedback() != null ? interview.getfeedback() : "N/A");
+        }
     }
 
     // Application logic
@@ -1277,8 +1623,8 @@ public class Main {
         System.out.println("Enter Password");
         String password = scanner.nextLine();
 
-        Users user = new Users(userId, userName, password, email, role);
-        userService.createUsers(user);
+        Users user = new Users(userId, userName, password, email, role, "", "");
+        userService.createUser(user);
 
         System.out.println("User created successfully!" + user.getuserId());
 

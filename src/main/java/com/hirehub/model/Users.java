@@ -7,24 +7,29 @@ public class Users {
     private String password;
     private String email;
     private String role;
+    private String firstName;
+    private String lastName;
 
-    //constructors
+    // constructors
 
-    public Users(){
+    public Users() {
 
     }
 
-    public Users(int userId, String userName, String password, String email, String role) {
+    public Users(int userId, String userName, String password, String email, String role, String firstName,
+            String lastName) {
         this.userId = userId;
         this.userName = userName;
         this.password = password;
         this.email = email;
         this.role = role;
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 
-    //getters and setters
+    // getters and setters
 
-    public int getuserId (){
+    public int getuserId() {
         return userId;
     }
 
@@ -38,7 +43,6 @@ public class Users {
 
     public void setuserName(String userName) {
         this.userName = userName;
-
     }
 
     public String getemail() {
@@ -59,9 +63,25 @@ public class Users {
 
     public String getpassword() {
         return password;
-    } 
+    }
 
     public void setpassword(String password) {
         this.password = password;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }
