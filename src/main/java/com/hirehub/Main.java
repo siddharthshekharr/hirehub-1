@@ -4,9 +4,11 @@ import com.hirehub.model.Candidates;
 import com.hirehub.model.Interviews;
 import com.hirehub.model.Job;
 import com.hirehub.model.Users;
+import com.hirehub.model.Applications;
 import com.hirehub.service.JobService;
 import com.hirehub.service.OffersService;
 import com.hirehub.service.UserService;
+import com.hirehub.service.ApplicationService;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
@@ -18,6 +20,7 @@ import com.hirehub.dao.JobDAO;
 import com.hirehub.dao.JobDAOIMPL;
 import com.hirehub.model.Enums;
 import java.util.Calendar;
+import java.math.BigDecimal;
 
 public class Main {
     private static final Scanner scanner = new Scanner(System.in);
@@ -26,6 +29,7 @@ public class Main {
     private static final UserService userService = new UserService();
     private static final InterviewsService interviewsService = new InterviewsService();
     private static final OffersService offersService = new OffersService();
+    private static final ApplicationService applicationService = new ApplicationService();
 
     // displays main menu where user can choose section to manage
     public static void main(String[] args) {
@@ -920,22 +924,309 @@ public class Main {
     // Application logic
 
     private static void createApplication() {
+        System.out.println("\n=== Create New Application ===");
 
+        // Get job ID
+        int jobId = getIntInput("Enter Job ID: ");
+
+        // Get candidate ID
+        int candidateId = getIntInput("Enter Candidate ID: ");
+
+        // Get application date (default to current date)
+        Date applicationDate = new Date();
+
+        // Get current salary
+        System.out.println("Enter Current Salary (optional, press Enter to skip): ");
+        String currentSalaryStr = getStringInput("");
+        BigDecimal currentSalary = null;
+        if (!currentSalaryStr.isEmpty()) {
+            try {
+                currentSalary = new BigDecimal(currentSalaryStr);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid salary format. Setting to null.");
+            }
+        }
+
+        // Get expected salary
+        System.out.println("Enter Expected Salary (optional, press Enter to skip): ");
+        String expectedSalaryStr = getStringInput("");
+        BigDecimal expectedSalary = null;
+        if (!expectedSalaryStr.isEmpty()) {
+            try {
+                expectedSalary = new BigDecimal(expectedSalaryStr);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid salary format. Setting to null.");
+            }
+        }
+
+        // Get notice period
+        System.out.println("Enter Notice Period in days (optional, press Enter to skip): ");
+        String noticePeriodStr = getStringInput("");
+        Integer noticePeriod = null;
+        if (!noticePeriodStr.isEmpty()) {
+            try {
+                noticePeriod = Integer.parseInt(noticePeriodStr);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid notice period format. Setting to null.");
+            }
+        }
+
+        // Get cover letter
+        String coverLetter = getStringInput("Enter Cover Letter (optional): ");
+
+        // Create the application object
+        try {
+            Applications application = new Applications(jobId, candidateId, applicationDate, "APPLIED", 0);
+
+            if (currentSalary != null) {
+                application.setCurrentSalary(currentSalary);
+            }
+
+            if (expectedSalary != null) {
+                application.setExpectedSalary(expectedSalary);
+            }
+
+            if (noticePeriod != null) {
+                application.setNoticePeriod(noticePeriod);
+            }
+
+            if (!coverLetter.isEmpty()) {
+                application.setcoverLetter(coverLetter);
+            }
+
+            boolean success = applicationService.createApplication(application);
+
+            if (success) {
+                System.out.println("Application created successfully with ID: " + application.getapplicationID());
+            } else {
+                System.out
+                        .println("Failed to create application. Please check that the Job ID and Candidate ID exist.");
+            }
+        } catch (Exception e) {
+            System.out.println("Error creating application: " + e.getMessage());
+            System.out.println("Please check that the Job ID and Candidate ID exist in the system.");
+            e.printStackTrace();
+        }
     }
 
     private static void viewAllApplications() {
+        System.out.println("\n=== All Applications ===");
 
+        List<Applications> applications = applicationService.getAllApplications();
+
+        if (applications.isEmpty()) {
+            System.out.println("No applications found.");
+            return;
+        }
+
+        System.out.println("ID | Job ID | Candidate ID | Date | Status");
+        System.out.println("--------------------------------------------------");
+
+        for (Applications application : applications) {
+            System.out.printf("%d | %d | %d | %s | %s%n",
+                    application.getapplicationID(),
+                    application.getjobID(),
+                    application.getcandidateID(),
+                    application.getapplicationDate(),
+                    application.getStatus());
+        }
     }
 
     private static void updateApplication() {
+        System.out.println("\n=== Update Application ===");
 
+        int applicationId = getIntInput("Enter Application ID to update: ");
+
+        // Retrieve the application
+        Applications application = applicationService.getApplicationById(applicationId);
+
+        if (application == null) {
+            System.out.println("Application not found with ID: " + applicationId);
+            return;
+        }
+
+        System.out.println("Current Application Details:");
+        System.out.printf("ID: %d | Job ID: %d | Candidate ID: %d | Date: %s | Status: %s%n",
+                application.getapplicationID(),
+                application.getjobID(),
+                application.getcandidateID(),
+                application.getapplicationDate(),
+                application.getStatus());
+
+        // Store original values to restore in case of error
+        int originalJobId = application.getjobID();
+        int originalCandidateId = application.getcandidateID();
+
+        // Update job ID
+        System.out.println("Enter new Job ID (or press Enter to keep current): ");
+        String jobIdStr = getStringInput("");
+        if (!jobIdStr.isEmpty()) {
+            try {
+                int jobId = Integer.parseInt(jobIdStr);
+                application.setjobID(jobId);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid job ID. Keeping current value.");
+            }
+        }
+
+        // Update candidate ID
+        System.out.println("Enter new Candidate ID (or press Enter to keep current): ");
+        String candidateIdStr = getStringInput("");
+        if (!candidateIdStr.isEmpty()) {
+            try {
+                int candidateId = Integer.parseInt(candidateIdStr);
+                application.setcandidateID(candidateId);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid candidate ID. Keeping current value.");
+            }
+        }
+
+        // Update status
+        System.out.println("Select new Application Status (or press Enter to keep current):");
+        System.out.println("1. APPLIED");
+        System.out.println("2. SCREENING");
+        System.out.println("3. SHORTLISTED");
+        System.out.println("4. INTERVIEWING");
+        System.out.println("5. OFFERED");
+        System.out.println("6. HIRED");
+        System.out.println("7. REJECTED");
+        System.out.println("8. Keep current status");
+
+        int statusChoice = getIntInput("Enter your choice: ");
+
+        if (statusChoice >= 1 && statusChoice <= 7) {
+            Enums.applicationStatus status;
+            switch (statusChoice) {
+                case 1 -> status = Enums.applicationStatus.APPLIED;
+                case 2 -> status = Enums.applicationStatus.SCREENING;
+                case 3 -> status = Enums.applicationStatus.SHORTLISTED;
+                case 4 -> status = Enums.applicationStatus.INTERVIEWING;
+                case 5 -> status = Enums.applicationStatus.OFFERED;
+                case 6 -> status = Enums.applicationStatus.HIRED;
+                case 7 -> status = Enums.applicationStatus.REJECTED;
+                default -> status = application.getStatus();
+            }
+            application.setstatus(status);
+        }
+
+        // Update current salary
+        System.out.println("Enter new Current Salary (or press Enter to keep current): ");
+        String currentSalaryStr = getStringInput("");
+        if (!currentSalaryStr.isEmpty()) {
+            try {
+                BigDecimal currentSalary = new BigDecimal(currentSalaryStr);
+                application.setCurrentSalary(currentSalary);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid salary format. Keeping current value.");
+            }
+        }
+
+        // Update expected salary
+        System.out.println("Enter new Expected Salary (or press Enter to keep current): ");
+        String expectedSalaryStr = getStringInput("");
+        if (!expectedSalaryStr.isEmpty()) {
+            try {
+                BigDecimal expectedSalary = new BigDecimal(expectedSalaryStr);
+                application.setExpectedSalary(expectedSalary);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid salary format. Keeping current value.");
+            }
+        }
+
+        // Update notice period
+        System.out.println("Enter new Notice Period in days (or press Enter to keep current): ");
+        String noticePeriodStr = getStringInput("");
+        if (!noticePeriodStr.isEmpty()) {
+            try {
+                Integer noticePeriod = Integer.parseInt(noticePeriodStr);
+                application.setNoticePeriod(noticePeriod);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid notice period format. Keeping current value.");
+            }
+        }
+
+        // Update cover letter
+        System.out.println("Enter new Cover Letter (or press Enter to keep current): ");
+        String coverLetter = getStringInput("");
+        if (!coverLetter.isEmpty()) {
+            application.setcoverLetter(coverLetter);
+        }
+
+        // Update the application
+        try {
+            boolean success = applicationService.updateApplication(application);
+            if (success) {
+                System.out.println("Application updated successfully.");
+            } else {
+                System.out
+                        .println("Failed to update application. Please check that the Job ID and Candidate ID exist.");
+            }
+        } catch (Exception e) {
+            System.out.println("Error updating application: " + e.getMessage());
+            e.printStackTrace();
+
+            // Restore original values
+            application.setjobID(originalJobId);
+            application.setcandidateID(originalCandidateId);
+
+            System.out.println("Application update failed. Original values have been restored.");
+        }
     }
 
     private static void deleteApplication() {
+        System.out.println("\n=== Delete Application ===");
 
+        int applicationId = getIntInput("Enter Application ID to delete: ");
+
+        // Confirm deletion
+        System.out.println("Are you sure you want to delete this application? (y/n): ");
+        String confirm = getStringInput("");
+
+        if (confirm.equalsIgnoreCase("y")) {
+            try {
+                boolean success = applicationService.deleteApplication(applicationId);
+
+                if (success) {
+                    System.out.println("Application deleted successfully.");
+                } else {
+                    System.out.println(
+                            "Failed to delete application. The application may not exist or there might be related records.");
+                }
+            } catch (Exception e) {
+                System.out.println("Error deleting application: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Deletion cancelled.");
+        }
     }
 
     private static void findApplication() {
+        System.out.println("\n=== Find Application ===");
+
+        int applicationId = getIntInput("Enter Application ID to find: ");
+
+        Applications application = applicationService.getApplicationById(applicationId);
+
+        if (application == null) {
+            System.out.println("Application not found with ID: " + applicationId);
+            return;
+        }
+
+        System.out.println("Application Details:");
+        System.out.printf("ID: %d%n", application.getapplicationID());
+        System.out.printf("Job ID: %d%n", application.getjobID());
+        System.out.printf("Candidate ID: %d%n", application.getcandidateID());
+        System.out.printf("Application Date: %s%n", application.getapplicationDate());
+        System.out.printf("Status: %s%n", application.getStatus());
+        System.out.printf("Current Salary: %s%n",
+                application.getCurrentSalary() != null ? application.getCurrentSalary() : "N/A");
+        System.out.printf("Expected Salary: %s%n",
+                application.getExpectedSalary() != null ? application.getExpectedSalary() : "N/A");
+        System.out.printf("Notice Period: %s days%n",
+                application.getnoticePeriod() != null ? application.getnoticePeriod() : "N/A");
+        System.out.printf("Cover Letter: %s%n",
+                application.getcoverLetter() != null ? application.getcoverLetter() : "N/A");
     }
 
     // Offer logic

@@ -2,6 +2,7 @@
 package com.hirehub.dao;
 
 import com.hirehub.model.Applications;
+import com.hirehub.model.Enums;
 import java.util.ArrayList;
 import java.sql.*;
 import java.util.List;
@@ -17,7 +18,7 @@ public class ApplicationsDAOImpl implements ApplicationsDAO {
 
     @Override
     public void add(Applications applications) {
-        String sql = "INSERT INTO applications (job_id, candidate_id, application_date, status_id, current_salary, expected_salary, notice_period, cover_letter) "
+        String sql = "INSERT INTO applications (job_id, candidate_id, application_date, status, current_salary, expected_salary, notice_period, cover_letter) "
                 + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -25,12 +26,32 @@ public class ApplicationsDAOImpl implements ApplicationsDAO {
             pstmt.setInt(2, applications.getcandidateID());
             pstmt.setTimestamp(3, new Timestamp(applications.getapplicationDate().getTime())); // convert Date to
                                                                                                // Timestamp for sql
-            // ordinal will return the index of the enum statuses
-            pstmt.setInt(4, applications.getStatus().ordinal() + 1);
-            pstmt.setBigDecimal(5, applications.getCurrentSalary());
-            pstmt.setBigDecimal(6, applications.getExpectedSalary());
-            pstmt.setInt(7, applications.getnoticePeriod());
-            pstmt.setString(8, applications.getcoverLetter());
+            pstmt.setString(4, applications.getStatus().name()); // Convert enum to string
+
+            // Handle null values properly
+            if (applications.getCurrentSalary() != null) {
+                pstmt.setBigDecimal(5, applications.getCurrentSalary());
+            } else {
+                pstmt.setNull(5, java.sql.Types.DECIMAL);
+            }
+
+            if (applications.getExpectedSalary() != null) {
+                pstmt.setBigDecimal(6, applications.getExpectedSalary());
+            } else {
+                pstmt.setNull(6, java.sql.Types.DECIMAL);
+            }
+
+            if (applications.getnoticePeriod() != null) {
+                pstmt.setInt(7, applications.getnoticePeriod());
+            } else {
+                pstmt.setNull(7, java.sql.Types.INTEGER);
+            }
+
+            if (applications.getcoverLetter() != null) {
+                pstmt.setString(8, applications.getcoverLetter());
+            } else {
+                pstmt.setNull(8, java.sql.Types.VARCHAR);
+            }
 
             pstmt.executeUpdate();
 
@@ -43,6 +64,7 @@ public class ApplicationsDAOImpl implements ApplicationsDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new RuntimeException("Error adding application: " + e.getMessage(), e);
         }
     }
 
@@ -61,7 +83,7 @@ public class ApplicationsDAOImpl implements ApplicationsDAO {
 
     @Override
     public void update(Applications applications) {
-        String sql = "UPDATE applications SET job_id = ?, candidate_id = ?, application_date = ?, status_id = ?, current_salary = ?, notice_period = ?, cover_letter = ? "
+        String sql = "UPDATE applications SET job_id = ?, candidate_id = ?, application_date = ?, status = ?, current_salary = ?, expected_salary = ?, notice_period = ?, cover_letter = ? "
                 +
                 "WHERE application_id = ?";
 
@@ -70,12 +92,39 @@ public class ApplicationsDAOImpl implements ApplicationsDAO {
             pstmt.setInt(2, applications.getcandidateID());
             pstmt.setTimestamp(3, new Timestamp(applications.getapplicationDate().getTime())); // convert Date to
                                                                                                // Timestamp for sql
-            pstmt.setInt(4, applications.getStatus().ordinal() + 1); // convert enum to string
-            pstmt.setBigDecimal(5, applications.getCurrentSalary());
+            pstmt.setString(4, applications.getStatus().name()); // convert enum to string
+
+            // Handle null values properly
+            if (applications.getCurrentSalary() != null) {
+                pstmt.setBigDecimal(5, applications.getCurrentSalary());
+            } else {
+                pstmt.setNull(5, java.sql.Types.DECIMAL);
+            }
+
+            if (applications.getExpectedSalary() != null) {
+                pstmt.setBigDecimal(6, applications.getExpectedSalary());
+            } else {
+                pstmt.setNull(6, java.sql.Types.DECIMAL);
+            }
+
+            if (applications.getnoticePeriod() != null) {
+                pstmt.setInt(7, applications.getnoticePeriod());
+            } else {
+                pstmt.setNull(7, java.sql.Types.INTEGER);
+            }
+
+            if (applications.getcoverLetter() != null) {
+                pstmt.setString(8, applications.getcoverLetter());
+            } else {
+                pstmt.setNull(8, java.sql.Types.VARCHAR);
+            }
+
+            pstmt.setInt(9, applications.getapplicationID());
 
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new RuntimeException("Error updating application: " + e.getMessage(), e);
         }
     }
 
@@ -120,10 +169,44 @@ public class ApplicationsDAOImpl implements ApplicationsDAO {
     private Applications extractApplicationFromResultSet(ResultSet rs) throws SQLException {
         Applications application = new Applications();
 
+        application.setapplicationID(rs.getInt("application_id"));
         application.setjobID(rs.getInt("job_id"));
         application.setcandidateID(rs.getInt("candidate_id"));
         application.setapplicationDate(rs.getTimestamp("application_date"));
-        application.setstatus(rs.getString("status"));
+
+        // Convert string to enum
+        String statusStr = rs.getString("status");
+        try {
+            application.setstatus(statusStr);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid application status: " + statusStr);
+            application.setstatus(Enums.applicationStatus.APPLIED); // Default value
+        }
+
+        // Get optional fields
+        try {
+            application.setCurrentSalary(rs.getBigDecimal("current_salary"));
+        } catch (SQLException e) {
+            // Field might be null, ignore
+        }
+
+        try {
+            application.setExpectedSalary(rs.getBigDecimal("expected_salary"));
+        } catch (SQLException e) {
+            // Field might be null, ignore
+        }
+
+        try {
+            application.setNoticePeriod(rs.getInt("notice_period"));
+        } catch (SQLException e) {
+            // Field might be null, ignore
+        }
+
+        try {
+            application.setcoverLetter(rs.getString("cover_letter"));
+        } catch (SQLException e) {
+            // Field might be null, ignore
+        }
 
         return application;
     }

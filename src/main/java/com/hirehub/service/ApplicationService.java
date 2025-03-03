@@ -12,16 +12,34 @@ public class ApplicationService {
         this.applicationsDAO = new ApplicationsDAOImpl();
     }
 
-    public void createApplication(Applications applications) {
-        applicationsDAO.add(applications);
+    public boolean createApplication(Applications applications) {
+        try {
+            applicationsDAO.add(applications);
+            return applications.getapplicationID() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
-    public void updateApplication(Applications applications) {
-        applicationsDAO.update(applications);
+    public boolean updateApplication(Applications applications) {
+        try {
+            applicationsDAO.update(applications);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
-    public void deleteApplication(int id) {
-        applicationsDAO.delete(id);
+    public boolean deleteApplication(int id) {
+        try {
+            applicationsDAO.delete(id);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public Applications getApplicationById(int id) {
