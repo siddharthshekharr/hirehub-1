@@ -27,31 +27,10 @@ public class ApplicationsDAOImpl implements ApplicationsDAO {
             pstmt.setTimestamp(3, new Timestamp(applications.getapplicationDate().getTime())); // convert Date to
                                                                                                // Timestamp for sql
             pstmt.setString(4, applications.getStatus().name()); // Convert enum to string
-
-            // Handle null values properly
-            if (applications.getCurrentSalary() != null) {
-                pstmt.setBigDecimal(5, applications.getCurrentSalary());
-            } else {
-                pstmt.setNull(5, java.sql.Types.DECIMAL);
-            }
-
-            if (applications.getExpectedSalary() != null) {
-                pstmt.setBigDecimal(6, applications.getExpectedSalary());
-            } else {
-                pstmt.setNull(6, java.sql.Types.DECIMAL);
-            }
-
-            if (applications.getnoticePeriod() != null) {
-                pstmt.setInt(7, applications.getnoticePeriod());
-            } else {
-                pstmt.setNull(7, java.sql.Types.INTEGER);
-            }
-
-            if (applications.getcoverLetter() != null) {
-                pstmt.setString(8, applications.getcoverLetter());
-            } else {
-                pstmt.setNull(8, java.sql.Types.VARCHAR);
-            }
+            pstmt.setBigDecimal(5, applications.getCurrentSalary());
+            pstmt.setBigDecimal(6, applications.getExpectedSalary());
+            pstmt.setInt(7, applications.getnoticePeriod() != null ? applications.getnoticePeriod() : 0);
+            pstmt.setString(8, applications.getcoverLetter());
 
             pstmt.executeUpdate();
 
@@ -64,7 +43,6 @@ public class ApplicationsDAOImpl implements ApplicationsDAO {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Error adding application: " + e.getMessage(), e);
         }
     }
 
@@ -93,38 +71,15 @@ public class ApplicationsDAOImpl implements ApplicationsDAO {
             pstmt.setTimestamp(3, new Timestamp(applications.getapplicationDate().getTime())); // convert Date to
                                                                                                // Timestamp for sql
             pstmt.setString(4, applications.getStatus().name()); // convert enum to string
-
-            // Handle null values properly
-            if (applications.getCurrentSalary() != null) {
-                pstmt.setBigDecimal(5, applications.getCurrentSalary());
-            } else {
-                pstmt.setNull(5, java.sql.Types.DECIMAL);
-            }
-
-            if (applications.getExpectedSalary() != null) {
-                pstmt.setBigDecimal(6, applications.getExpectedSalary());
-            } else {
-                pstmt.setNull(6, java.sql.Types.DECIMAL);
-            }
-
-            if (applications.getnoticePeriod() != null) {
-                pstmt.setInt(7, applications.getnoticePeriod());
-            } else {
-                pstmt.setNull(7, java.sql.Types.INTEGER);
-            }
-
-            if (applications.getcoverLetter() != null) {
-                pstmt.setString(8, applications.getcoverLetter());
-            } else {
-                pstmt.setNull(8, java.sql.Types.VARCHAR);
-            }
-
+            pstmt.setBigDecimal(5, applications.getCurrentSalary());
+            pstmt.setBigDecimal(6, applications.getExpectedSalary());
+            pstmt.setInt(7, applications.getnoticePeriod() != null ? applications.getnoticePeriod() : 0);
+            pstmt.setString(8, applications.getcoverLetter());
             pstmt.setInt(9, applications.getapplicationID());
 
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Error updating application: " + e.getMessage(), e);
         }
     }
 

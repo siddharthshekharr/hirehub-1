@@ -994,17 +994,10 @@ public class Main {
                 application.setcoverLetter(coverLetter);
             }
 
-            boolean success = applicationService.createApplication(application);
-
-            if (success) {
-                System.out.println("Application created successfully with ID: " + application.getapplicationID());
-            } else {
-                System.out
-                        .println("Failed to create application. Please check that the Job ID and Candidate ID exist.");
-            }
+            applicationService.createApplication(application);
+            System.out.println("Application created successfully with ID: " + application.getapplicationID());
         } catch (Exception e) {
             System.out.println("Error creating application: " + e.getMessage());
-            System.out.println("Please check that the Job ID and Candidate ID exist in the system.");
             e.printStackTrace();
         }
     }
@@ -1052,10 +1045,6 @@ public class Main {
                 application.getcandidateID(),
                 application.getapplicationDate(),
                 application.getStatus());
-
-        // Store original values to restore in case of error
-        int originalJobId = application.getjobID();
-        int originalCandidateId = application.getcandidateID();
 
         // Update job ID
         System.out.println("Enter new Job ID (or press Enter to keep current): ");
@@ -1154,22 +1143,11 @@ public class Main {
 
         // Update the application
         try {
-            boolean success = applicationService.updateApplication(application);
-            if (success) {
-                System.out.println("Application updated successfully.");
-            } else {
-                System.out
-                        .println("Failed to update application. Please check that the Job ID and Candidate ID exist.");
-            }
+            applicationService.updateApplication(application);
+            System.out.println("Application updated successfully.");
         } catch (Exception e) {
             System.out.println("Error updating application: " + e.getMessage());
             e.printStackTrace();
-
-            // Restore original values
-            application.setjobID(originalJobId);
-            application.setcandidateID(originalCandidateId);
-
-            System.out.println("Application update failed. Original values have been restored.");
         }
     }
 
@@ -1184,14 +1162,8 @@ public class Main {
 
         if (confirm.equalsIgnoreCase("y")) {
             try {
-                boolean success = applicationService.deleteApplication(applicationId);
-
-                if (success) {
-                    System.out.println("Application deleted successfully.");
-                } else {
-                    System.out.println(
-                            "Failed to delete application. The application may not exist or there might be related records.");
-                }
+                applicationService.deleteApplication(applicationId);
+                System.out.println("Application deleted successfully.");
             } catch (Exception e) {
                 System.out.println("Error deleting application: " + e.getMessage());
                 e.printStackTrace();
