@@ -16,7 +16,7 @@ import com.hirehub.dao.CandidatesDAO;
 import com.hirehub.dao.CandidatesDAOIMPL;
 import com.hirehub.dao.JobDAO;
 import com.hirehub.dao.JobDAOIMPL;
-import com.hirehub.util.Enums;
+import com.hirehub.model.Enums;
 import java.util.Calendar;
 
 public class Main {
@@ -329,7 +329,7 @@ public class Main {
         JobDAO jobDAO = new JobDAOIMPL();
         jobDAO.add(job);
 
-        System.out.println("Job created successfully!");
+        System.out.println("Job created successfully! ID: " + job.getId());
     }
 
     private static void viewAllJobs() {

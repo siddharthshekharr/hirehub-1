@@ -19,17 +19,9 @@ public class JobDAOIMPL implements JobDAO {
     }
 
     @Override //
-
     public void add(Job job) {
-        String sql = "INSERT INTO jobs (title, description, requirements, posting_date, closing_date, status, id) VALUES (?, ?, ?, ?, ?, ?, ?)"; // placeholder
-                                                                                                                                                 // for
-                                                                                                                                                 // those
-                                                                                                                                                 // values
-                                                                                                                                                 // as
-                                                                                                                                                 // it
-                                                                                                                                                 // cannot
-                                                                                                                                                 // be
-                                                                                                                                                 // hardcoded.
+        String sql = "INSERT INTO jobs (title, description, requirements, posting_date, closing_date, status) VALUES (?, ?, ?, ?, ?, ?)";
+
         try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, job.getTitle());
             pstmt.setString(2, job.getDescription());
@@ -38,19 +30,24 @@ public class JobDAOIMPL implements JobDAO {
             pstmt.setDate(5, new java.sql.Date(job.getClosingDate().getTime()));
             // .name returns the name of the enum constant to a string
             pstmt.setString(6, job.getStatus().name());
-            pstmt.setInt(7, job.getId());
 
-            pstmt.executeUpdate();
+            int affectedRows = pstmt.executeUpdate();
 
+            if (affectedRows > 0) {
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        job.setId(generatedKeys.getInt(1));
+                    }
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
     }
 
     @Override
     public void update(Job job) {
-        String sql = "UPDATE jobs SET title = ?, description = ?, requirements = ?, posting_date = ?, closing_date = ?, status = ? WHERE id = ?";
+        String sql = "UPDATE jobs SET title = ?, description = ?, requirements = ?, posting_date = ?, closing_date = ?, status = ? WHERE job_id = ?";
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, job.getTitle());
@@ -100,7 +97,7 @@ public class JobDAOIMPL implements JobDAO {
 
         List<Job> job = new ArrayList<>();
 
-        String sql = "SELECT * FROM jobs ORDER BY registration_date DESC";
+        String sql = "SELECT * FROM jobs ORDER BY posting_date DESC";
 
         try (Statement stmt = connection.createStatement();
                 ResultSet rs = stmt.executeQuery(sql)) {
