@@ -93,8 +93,8 @@ public class Candidates implements Serializable {
     }
 
     public void setemailAddress(String emailAddress) {
-        if (emailAddress == null || !emailAddress.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            throw new IllegalArgumentException("Invalid email format");
+        if (emailAddress == null || emailAddress.trim().isEmpty()) {
+            throw new IllegalArgumentException("Email address cannot be empty");
         }
         this.emailAddress = emailAddress.toLowerCase().trim();
     }
@@ -104,13 +104,10 @@ public class Candidates implements Serializable {
     }
 
     public void setphoneNumber(String phoneNumber2) {
-        this.phoneNumber = phoneNumber2;
-        {
-            if (phoneNumber2 == null || !phoneNumber2.matches("^\\+?[0-9]{10,15}$")) {
-                throw new IllegalArgumentException("Invalid phone number format");
-            }
-            this.phoneNumber = phoneNumber2.trim();
+        if (phoneNumber2 == null || phoneNumber2.trim().isEmpty()) {
+            throw new IllegalArgumentException("Phone number cannot be empty");
         }
+        this.phoneNumber = phoneNumber2.trim();
     }
 
     public String getresumeURL() {

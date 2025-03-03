@@ -12,6 +12,12 @@ import java.util.List;
 import java.util.Scanner;
 import com.hirehub.service.CandidateService;
 import com.hirehub.service.InterviewsService;
+import com.hirehub.dao.CandidatesDAO;
+import com.hirehub.dao.CandidatesDAOIMPL;
+import com.hirehub.dao.JobDAO;
+import com.hirehub.dao.JobDAOIMPL;
+import com.hirehub.util.Enums;
+import java.util.Calendar;
 
 public class Main {
     private static final Scanner scanner = new Scanner(System.in);
@@ -44,6 +50,23 @@ public class Main {
                 }
                 default -> System.out.println("Invalid option. Please try again.");
             }
+        }
+    }
+
+    // String input, to get a string from the user
+    private static String getStringInput(String prompt) {
+        System.out.print(prompt);
+
+        // Handle the case where we're coming from a getIntInput call
+        if (scanner.hasNextLine()) {
+            String input = scanner.nextLine();
+            if (input.isEmpty() && scanner.hasNextLine()) {
+                input = scanner.nextLine();
+            }
+            return input.trim();
+        } else {
+            scanner.next(); // Consume any non-newline token
+            return scanner.nextLine().trim();
         }
     }
 
@@ -253,23 +276,219 @@ public class Main {
     // Job logic
 
     private static void createJob() {
+        String title = getStringInput("Enter job title: ");
+        String description = getStringInput("Enter job description: ");
+        String requirements = getStringInput("Enter job requirements: ");
 
+        System.out.println("Enter posting date (YYYY-MM-DD): ");
+        String postingDateStr = scanner.nextLine();
+        Date postingDate = null;
+        try {
+            postingDate = java.sql.Date.valueOf(postingDateStr);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid date format. Using current date.");
+            postingDate = new Date();
+        }
+
+        System.out.println("Enter closing date (YYYY-MM-DD): ");
+        String closingDateStr = scanner.nextLine();
+        Date closingDate = null;
+        try {
+            closingDate = java.sql.Date.valueOf(closingDateStr);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid date format. Using date 30 days from now.");
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new Date());
+            calendar.add(Calendar.DAY_OF_MONTH, 30);
+            closingDate = new Date(calendar.getTimeInMillis());
+        }
+
+        System.out.println("Select job status:");
+        System.out.println("1. DRAFT");
+        System.out.println("2. OPEN");
+        System.out.println("3. CLOSED");
+        System.out.println("4. ON_HOLD");
+
+        int statusChoice = getIntInput("Enter your choice: ");
+        Enums.jobStatus status = switch (statusChoice) {
+            case 1 -> Enums.jobStatus.DRAFT;
+            case 2 -> Enums.jobStatus.OPEN;
+            case 3 -> Enums.jobStatus.CLOSED;
+            case 4 -> Enums.jobStatus.ON_HOLD;
+            default -> Enums.jobStatus.DRAFT;
+        };
+
+        Job job = new Job();
+        job.setTitle(title);
+        job.setDescription(description);
+        job.setRequirements(requirements);
+        job.setPostingDate(postingDate);
+        job.setClosingDate(closingDate);
+        job.setStatus(status);
+
+        JobDAO jobDAO = new JobDAOIMPL();
+        jobDAO.add(job);
+
+        System.out.println("Job created successfully!");
     }
 
     private static void viewAllJobs() {
+        JobDAO jobDAO = new JobDAOIMPL();
+        List<Job> jobList = jobDAO.getAll();
 
+        if (jobList.isEmpty()) {
+            System.out.println("No jobs found.");
+            return;
+        }
+
+        System.out.println("\n=== All Jobs ===");
+        System.out.printf("%-5s %-30s %-15s %-15s %-10s%n",
+                "ID", "Title", "Posting Date", "Closing Date", "Status");
+        System.out.println("-------------------------------------------------------------------------");
+
+        for (Job job : jobList) {
+            System.out.printf("%-5d %-30s %-15s %-15s %-10s%n",
+                    job.getId(),
+                    job.getTitle(),
+                    job.getPostingDate(),
+                    job.getClosingDate(),
+                    job.getStatus());
+        }
     }
 
     private static void viewById() {
+        int id = getIntInput("Enter job ID to find: ");
 
+        JobDAO jobDAO = new JobDAOIMPL();
+        Job job = jobDAO.getId(id);
+
+        if (job == null) {
+            System.out.println("Job not found with ID: " + id);
+            return;
+        }
+
+        System.out.println("\n=== Job Details ===");
+        System.out.printf("ID: %d%n", job.getId());
+        System.out.printf("Title: %s%n", job.getTitle());
+        System.out.printf("Description: %s%n", job.getDescription());
+        System.out.printf("Requirements: %s%n", job.getRequirements());
+        System.out.printf("Posting Date: %s%n", job.getPostingDate());
+        System.out.printf("Closing Date: %s%n", job.getClosingDate());
+        System.out.printf("Status: %s%n", job.getStatus());
     }
 
     private static void updateJob() {
+        int id = getIntInput("Enter job ID to update: ");
 
+        JobDAO jobDAO = new JobDAOIMPL();
+        Job job = jobDAO.getId(id);
+
+        if (job == null) {
+            System.out.println("Job not found with ID: " + id);
+            return;
+        }
+
+        System.out.println("Current details:");
+        System.out.printf(
+                "ID: %d%nTitle: %s%nDescription: %s%nRequirements: %s%nPosting Date: %s%nClosing Date: %s%nStatus: %s%n",
+                job.getId(),
+                job.getTitle(),
+                job.getDescription(),
+                job.getRequirements(),
+                job.getPostingDate(),
+                job.getClosingDate(),
+                job.getStatus());
+
+        // Get updated information
+        String title = getStringInput("Enter new title (or press Enter to keep current): ");
+        if (!title.isEmpty()) {
+            job.setTitle(title);
+        }
+
+        String description = getStringInput("Enter new description (or press Enter to keep current): ");
+        if (!description.isEmpty()) {
+            job.setDescription(description);
+        }
+
+        String requirements = getStringInput("Enter new requirements (or press Enter to keep current): ");
+        if (!requirements.isEmpty()) {
+            job.setRequirements(requirements);
+        }
+
+        String postingDateStr = getStringInput(
+                "Enter new posting date (YYYY-MM-DD) (or press Enter to keep current): ");
+        if (!postingDateStr.isEmpty()) {
+            try {
+                Date postingDate = java.sql.Date.valueOf(postingDateStr);
+                job.setPostingDate(postingDate);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid date format. Keeping current posting date.");
+            }
+        }
+
+        String closingDateStr = getStringInput(
+                "Enter new closing date (YYYY-MM-DD) (or press Enter to keep current): ");
+        if (!closingDateStr.isEmpty()) {
+            try {
+                Date closingDate = java.sql.Date.valueOf(closingDateStr);
+                job.setClosingDate(closingDate);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid date format. Keeping current closing date.");
+            }
+        }
+
+        System.out.println("Select new status:");
+        System.out.println("1. DRAFT");
+        System.out.println("2. OPEN");
+        System.out.println("3. CLOSED");
+        System.out.println("4. ON_HOLD");
+        System.out.println("5. Keep current status");
+
+        int statusChoice = getIntInput("Enter your choice: ");
+        if (statusChoice >= 1 && statusChoice <= 4) {
+            Enums.jobStatus newStatus = switch (statusChoice) {
+                case 1 -> Enums.jobStatus.DRAFT;
+                case 2 -> Enums.jobStatus.OPEN;
+                case 3 -> Enums.jobStatus.CLOSED;
+                case 4 -> Enums.jobStatus.ON_HOLD;
+                default -> job.getStatus();
+            };
+            job.setStatus(newStatus);
+        }
+
+        jobDAO.update(job);
+        System.out.println("Job updated successfully!");
     }
 
     private static void deleteJob() {
+        int id = getIntInput("Enter job ID to delete: ");
 
+        JobDAO jobDAO = new JobDAOIMPL();
+        Job job = jobDAO.getId(id);
+
+        if (job == null) {
+            System.out.println("Job not found with ID: " + id);
+            return;
+        }
+
+        System.out.println("Are you sure you want to delete this job?");
+        System.out.printf("ID: %d%nTitle: %s%nStatus: %s%n",
+                job.getId(),
+                job.getTitle(),
+                job.getStatus());
+
+        // Clear the scanner buffer
+        scanner.nextLine();
+
+        System.out.print("Type 'YES' to confirm deletion: ");
+        String confirmation = scanner.nextLine().trim();
+
+        if (confirmation.equalsIgnoreCase("YES")) {
+            jobDAO.delete(id);
+            System.out.println("Job deleted successfully!");
+        } else {
+            System.out.println("Deletion cancelled.");
+        }
     }
 
     // Candidate logic
@@ -297,18 +516,149 @@ public class Main {
     }
 
     private static void viewAllCandidates() {
+        CandidatesDAO candidatesDAO = new CandidatesDAOIMPL();
+        List<Candidates> candidatesList = candidatesDAO.getAll();
 
+        if (candidatesList.isEmpty()) {
+            System.out.println("No candidates found.");
+            return;
+        }
+
+        System.out.println("\n=== All Candidates ===");
+        System.out.printf("%-5s %-15s %-15s %-25s %-15s %-10s%n",
+                "ID", "First Name", "Last Name", "Email", "Phone", "Status");
+        System.out.println("-------------------------------------------------------------------------");
+
+        for (Candidates candidate : candidatesList) {
+            System.out.printf("%-5d %-15s %-15s %-25s %-15s %-10s%n",
+                    candidate.getId(),
+                    candidate.getfirstName(),
+                    candidate.getlastName(),
+                    candidate.getemailAddress(),
+                    candidate.getphoneNumber(),
+                    candidate.getStatus());
+        }
     }
 
     private static void updateCandidate() {
+        int id = getIntInput("Enter candidate ID to update: ");
 
+        CandidatesDAO candidatesDAO = new CandidatesDAOIMPL();
+        Candidates candidate = candidatesDAO.getId(id);
+
+        if (candidate == null) {
+            System.out.println("Candidate not found with ID: " + id);
+            return;
+        }
+
+        System.out.println("Current details:");
+        System.out.printf("ID: %d%nName: %s %s%nEmail: %s%nPhone: %s%nStatus: %s%n",
+                candidate.getId(),
+                candidate.getfirstName(),
+                candidate.getlastName(),
+                candidate.getemailAddress(),
+                candidate.getphoneNumber(),
+                candidate.getStatus());
+
+        // Get updated information
+        String firstName = getStringInput("Enter new first name (or press Enter to keep current): ");
+        if (!firstName.isEmpty()) {
+            candidate.setfirstName(firstName);
+        }
+
+        String lastName = getStringInput("Enter new last name (or press Enter to keep current): ");
+        if (!lastName.isEmpty()) {
+            candidate.setlastName(lastName);
+        }
+
+        String email = getStringInput("Enter new email (or press Enter to keep current): ");
+        if (!email.isEmpty()) {
+            candidate.setemailAddress(email);
+        }
+
+        String phone = getStringInput("Enter new phone number (or press Enter to keep current): ");
+        if (!phone.isEmpty()) {
+            candidate.setphoneNumber(phone);
+        }
+
+        String resumeURL = getStringInput("Enter new resume URL (or press Enter to keep current): ");
+        if (!resumeURL.isEmpty()) {
+            candidate.setresumeURL(resumeURL);
+        }
+
+        System.out.println("Select new status:");
+        System.out.println("1. ACTIVE");
+        System.out.println("2. INACTIVE");
+        System.out.println("3. BLACKLISTED");
+        System.out.println("4. Keep current status");
+
+        int statusChoice = getIntInput("Enter your choice: ");
+        if (statusChoice >= 1 && statusChoice <= 3) {
+            Candidates.CandidateStatus newStatus = switch (statusChoice) {
+                case 1 -> Candidates.CandidateStatus.ACTIVE;
+                case 2 -> Candidates.CandidateStatus.INACTIVE;
+                case 3 -> Candidates.CandidateStatus.BLACKLISTED;
+                default -> candidate.getStatus();
+            };
+            candidate.setStatus(newStatus);
+        }
+
+        candidatesDAO.update(candidate);
+        System.out.println("Candidate updated successfully!");
     }
 
     private static void deleteCandidate() {
+        int id = getIntInput("Enter candidate ID to delete: ");
 
+        CandidatesDAO candidatesDAO = new CandidatesDAOIMPL();
+        Candidates candidate = candidatesDAO.getId(id);
+
+        if (candidate == null) {
+            System.out.println("Candidate not found with ID: " + id);
+            return;
+        }
+
+        System.out.println("Are you sure you want to delete this candidate?");
+        System.out.printf("ID: %d%nName: %s %s%nEmail: %s%n",
+                candidate.getId(),
+                candidate.getfirstName(),
+                candidate.getlastName(),
+                candidate.getemailAddress());
+
+        // Clear the scanner buffer
+        scanner.nextLine();
+
+        System.out.print("Type 'YES' to confirm deletion: ");
+        String confirmation = scanner.nextLine().trim();
+
+        if (confirmation.equalsIgnoreCase("YES")) {
+            candidatesDAO.delete(id);
+            System.out.println("Candidate deleted successfully!");
+        } else {
+            System.out.println("Deletion cancelled.");
+        }
     }
 
     private static void findById() {
+        int id = getIntInput("Enter candidate ID to find: ");
+
+        CandidatesDAO candidatesDAO = new CandidatesDAOIMPL();
+        Candidates candidate = candidatesDAO.getId(id);
+
+        if (candidate == null) {
+            System.out.println("Candidate not found with ID: " + id);
+            return;
+        }
+
+        System.out.println("\n=== Candidate Details ===");
+        System.out.printf("ID: %d%n", candidate.getId());
+        System.out.printf("First Name: %s%n", candidate.getfirstName());
+        System.out.printf("Last Name: %s%n", candidate.getlastName());
+        System.out.printf("Email: %s%n", candidate.getemailAddress());
+        System.out.printf("Phone: %s%n", candidate.getphoneNumber());
+        System.out.printf("Resume URL: %s%n", candidate.getresumeURL());
+        System.out.printf("Status: %s%n", candidate.getStatus());
+        System.out.printf("Registration Date: %s%n", candidate.getregistrationDate());
     }
 
     // User logic
