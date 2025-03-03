@@ -685,22 +685,236 @@ public class Main {
     // Interview logic
 
     private static void createInterview() {
+        System.out.println("\n=== Create New Interview ===");
 
+        // Get application ID
+        int applicationId = getIntInput("Enter Application ID: ");
+
+        // Get interview date
+        System.out.println("Enter Interview Date (format: YYYY-MM-DD): ");
+        String dateStr = getStringInput("");
+
+        // Get interview time
+        System.out.println("Enter Interview Time (format: HH:MM): ");
+        String timeStr = getStringInput("");
+
+        // Parse date and time
+        Date interviewDate = null;
+        try {
+            Calendar calendar = Calendar.getInstance();
+            String[] dateParts = dateStr.split("-");
+            String[] timeParts = timeStr.split(":");
+
+            int year = Integer.parseInt(dateParts[0]);
+            int month = Integer.parseInt(dateParts[1]) - 1; // Calendar months are 0-based
+            int day = Integer.parseInt(dateParts[2]);
+            int hour = Integer.parseInt(timeParts[0]);
+            int minute = Integer.parseInt(timeParts[1]);
+
+            calendar.set(year, month, day, hour, minute, 0);
+            interviewDate = calendar.getTime();
+        } catch (Exception e) {
+            System.out.println("Invalid date or time format. Please try again.");
+            return;
+        }
+
+        // Get feedback (optional)
+        String feedback = getStringInput("Enter Feedback (optional): ");
+
+        // Get status
+        System.out.println("Select Interview Status:");
+        System.out.println("1. SCHEDULED");
+        System.out.println("2. COMPLETED");
+        System.out.println("3. CANCELLED");
+        System.out.println("4. NO_SHOW");
+
+        int statusChoice = getIntInput("Enter your choice: ");
+        Enums.interviewStatus status;
+
+        switch (statusChoice) {
+            case 1 -> status = Enums.interviewStatus.SCHEDULED;
+            case 2 -> status = Enums.interviewStatus.COMPLETED;
+            case 3 -> status = Enums.interviewStatus.CANCELLED;
+            case 4 -> status = Enums.interviewStatus.NO_SHOW;
+            default -> {
+                System.out.println("Invalid choice. Setting status to SCHEDULED.");
+                status = Enums.interviewStatus.SCHEDULED;
+            }
+        }
+
+        // Create the interview
+        try {
+            Interviews interview = interviewsService.createInterview(applicationId, interviewDate, feedback, status);
+            System.out.println("Interview created successfully with ID: " + interview.getinterviewID());
+        } catch (Exception e) {
+            System.out.println("Error creating interview: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private static void viewAllInterviews() {
+        System.out.println("\n=== All Interviews ===");
 
+        List<Interviews> interviews = interviewsService.getAllInterviews();
+
+        if (interviews.isEmpty()) {
+            System.out.println("No interviews found.");
+            return;
+        }
+
+        System.out.println("ID | Application ID | Date | Status | Feedback");
+        System.out.println("--------------------------------------------------");
+
+        for (Interviews interview : interviews) {
+            System.out.printf("%d | %d | %s | %s | %s%n",
+                    interview.getinterviewID(),
+                    interview.getapplicationID(),
+                    interview.getinterviewDate(),
+                    interview.getstatus(),
+                    interview.getfeedback() != null ? interview.getfeedback() : "N/A");
+        }
     }
 
     private static void updateInterview() {
+        System.out.println("\n=== Update Interview ===");
 
+        int interviewId = getIntInput("Enter Interview ID to update: ");
+
+        // Retrieve the interview
+        Interviews interview = interviewsService.getInterviewById(interviewId);
+
+        if (interview == null) {
+            System.out.println("Interview not found with ID: " + interviewId);
+            return;
+        }
+
+        System.out.println("Current Interview Details:");
+        System.out.printf("ID: %d | Application ID: %d | Date: %s | Status: %s | Feedback: %s%n",
+                interview.getinterviewID(),
+                interview.getapplicationID(),
+                interview.getinterviewDate(),
+                interview.getstatus(),
+                interview.getfeedback() != null ? interview.getfeedback() : "N/A");
+
+        // Update application ID
+        System.out.println("Enter new Application ID (or press Enter to keep current): ");
+        String applicationIdStr = getStringInput("");
+        if (!applicationIdStr.isEmpty()) {
+            try {
+                int applicationId = Integer.parseInt(applicationIdStr);
+                interview.setapplicationID(applicationId);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid application ID. Keeping current value.");
+            }
+        }
+
+        // Update interview date
+        System.out.println("Enter new Interview Date (format: YYYY-MM-DD) or press Enter to keep current: ");
+        String dateStr = getStringInput("");
+
+        if (!dateStr.isEmpty()) {
+            System.out.println("Enter new Interview Time (format: HH:MM) or press Enter to keep current: ");
+            String timeStr = getStringInput("");
+
+            if (!timeStr.isEmpty()) {
+                try {
+                    Calendar calendar = Calendar.getInstance();
+                    String[] dateParts = dateStr.split("-");
+                    String[] timeParts = timeStr.split(":");
+
+                    int year = Integer.parseInt(dateParts[0]);
+                    int month = Integer.parseInt(dateParts[1]) - 1; // Calendar months are 0-based
+                    int day = Integer.parseInt(dateParts[2]);
+                    int hour = Integer.parseInt(timeParts[0]);
+                    int minute = Integer.parseInt(timeParts[1]);
+
+                    calendar.set(year, month, day, hour, minute, 0);
+                    interview.setinterviewDate(calendar.getTime());
+                } catch (Exception e) {
+                    System.out.println("Invalid date or time format. Keeping current value.");
+                }
+            }
+        }
+
+        // Update feedback
+        System.out.println("Enter new Feedback (or press Enter to keep current): ");
+        String feedback = getStringInput("");
+        if (!feedback.isEmpty()) {
+            interview.setfeedback(feedback);
+        }
+
+        // Update status
+        System.out.println("Select new Interview Status (or press Enter to keep current):");
+        System.out.println("1. SCHEDULED");
+        System.out.println("2. COMPLETED");
+        System.out.println("3. CANCELLED");
+        System.out.println("4. NO_SHOW");
+        System.out.println("5. Keep current status");
+
+        int statusChoice = getIntInput("Enter your choice: ");
+
+        if (statusChoice >= 1 && statusChoice <= 4) {
+            Enums.interviewStatus status;
+            switch (statusChoice) {
+                case 1 -> status = Enums.interviewStatus.SCHEDULED;
+                case 2 -> status = Enums.interviewStatus.COMPLETED;
+                case 3 -> status = Enums.interviewStatus.CANCELLED;
+                case 4 -> status = Enums.interviewStatus.NO_SHOW;
+                default -> status = interview.getstatus();
+            }
+            interview.setstatus(status);
+        }
+
+        // Update the interview
+        boolean success = interviewsService.updateInterview(interview);
+
+        if (success) {
+            System.out.println("Interview updated successfully.");
+        } else {
+            System.out.println("Failed to update interview.");
+        }
     }
 
     private static void deleteInterview() {
+        System.out.println("\n=== Delete Interview ===");
 
+        int interviewId = getIntInput("Enter Interview ID to delete: ");
+
+        // Confirm deletion
+        System.out.println("Are you sure you want to delete this interview? (y/n): ");
+        String confirm = getStringInput("");
+
+        if (confirm.equalsIgnoreCase("y")) {
+            boolean success = interviewsService.deleteInterview(interviewId);
+
+            if (success) {
+                System.out.println("Interview deleted successfully.");
+            } else {
+                System.out.println("Failed to delete interview.");
+            }
+        } else {
+            System.out.println("Deletion cancelled.");
+        }
     }
 
     private static void findInterview() {
+        System.out.println("\n=== Find Interview ===");
+
+        int interviewId = getIntInput("Enter Interview ID to find: ");
+
+        Interviews interview = interviewsService.getInterviewById(interviewId);
+
+        if (interview == null) {
+            System.out.println("Interview not found with ID: " + interviewId);
+            return;
+        }
+
+        System.out.println("Interview Details:");
+        System.out.printf("ID: %d%n", interview.getinterviewID());
+        System.out.printf("Application ID: %d%n", interview.getapplicationID());
+        System.out.printf("Date: %s%n", interview.getinterviewDate());
+        System.out.printf("Status: %s%n", interview.getstatus());
+        System.out.printf("Feedback: %s%n", interview.getfeedback() != null ? interview.getfeedback() : "N/A");
     }
 
     // Application logic
@@ -823,7 +1037,7 @@ public class Main {
         String feedback = scanner.nextLine();
 
         Interviews interview = new Interviews(interviewID, applicationID, null, feedback, feedback);
-        interviewsService.createInterviews();
+        interviewsService.createInterview(applicationID, new Date(), feedback, Enums.interviewStatus.SCHEDULED);
 
         // job CRUD
         JobService jobService = new JobService();
