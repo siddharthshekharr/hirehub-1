@@ -1,6 +1,7 @@
 package com.hirehub.model;
-import java.util.Date;
 
+import java.util.Date;
+import java.math.BigDecimal;
 
 public class Offers {
 
@@ -9,7 +10,7 @@ public class Offers {
     private BigDecimal salary;
     private Date startDate;
     private String status;
-    //constructor
+    // constructor
 
     public Offers() {
 
@@ -23,8 +24,7 @@ public class Offers {
         this.status = status;
     }
 
-
-    //getters and setters 
+    // getters and setters
 
     public int getofferID() {
         return offerID;
@@ -40,14 +40,13 @@ public class Offers {
 
     public void setapplicationID(int applicationID) {
         this.applicationID = applicationID;
-
     }
 
-    public boolean getsalary() {
+    public BigDecimal getsalary() {
         return salary;
     }
 
-    public void setsalary(boolean salary) {
+    public void setsalary(BigDecimal salary) {
         this.salary = salary;
     }
 
@@ -55,8 +54,8 @@ public class Offers {
         return startDate;
     }
 
-    public void setstartDate(Date starDate) {
-        this.startDate = starDate;
+    public void setstartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
     public String getstatus() {
@@ -67,5 +66,4 @@ public class Offers {
         this.status = status;
     }
 
-    
 }

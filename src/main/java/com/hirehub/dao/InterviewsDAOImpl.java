@@ -1,5 +1,6 @@
 package com.hirehub.dao;
 
+import com.hirehub.model.Enums;
 import com.hirehub.model.Interviews;
 import com.hirehub.util.DatabaseConnection;
 
@@ -21,15 +22,16 @@ public class InterviewsDAOImpl implements InterviewsDAO {
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setInt(1, interview.getapplicationID());
-            pstmt.setTimestamp(2, new Timestamp(interview.getinterviewDate().getTime())); // Convert Date to Timestamp for SQL
+            pstmt.setTimestamp(2, new Timestamp(interview.getinterviewDate().getTime())); // Convert Date to Timestamp
+                                                                                          // for SQL
             pstmt.setString(3, interview.getfeedback());
-            pstmt.setString(4, interview.getstatus());
+            pstmt.setString(4, interview.getstatus().name()); // Convert enum to string
 
             pstmt.executeUpdate();
 
             try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    interview.setinterviewID(generatedKeys.getInt(1));  // Set the generated ID
+                    interview.setinterviewID(generatedKeys.getInt(1)); // Set the generated ID
                 } else {
                     throw new SQLException("Creating interview failed, no ID obtained.");
                 }
@@ -46,10 +48,11 @@ public class InterviewsDAOImpl implements InterviewsDAO {
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, interview.getapplicationID());
-            pstmt.setTimestamp(2, new Timestamp(interview.getinterviewDate().getTime())); // Convert Date to Timestamp for SQL
+            pstmt.setTimestamp(2, new Timestamp(interview.getinterviewDate().getTime())); // Convert Date to Timestamp
+                                                                                          // for SQL
             pstmt.setString(3, interview.getfeedback());
-            pstmt.setString(4, interview.getstatus());
-            pstmt.setInt(5, interview.getinterviewID());  // Using interview_id for the WHERE clause
+            pstmt.setString(4, interview.getstatus().name()); // Convert enum to string
+            pstmt.setInt(5, interview.getinterviewID()); // Using interview_id for the WHERE clause
 
             pstmt.executeUpdate();
 
@@ -96,7 +99,7 @@ public class InterviewsDAOImpl implements InterviewsDAO {
         String sql = "SELECT * FROM interviews";
 
         try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 interviewsList.add(extractInterviewFromResultSet(rs));
@@ -117,7 +120,15 @@ public class InterviewsDAOImpl implements InterviewsDAO {
         interview.setapplicationID(rs.getInt("application_id"));
         interview.setinterviewDate(rs.getTimestamp("interview_date"));
         interview.setfeedback(rs.getString("feedback"));
-        interview.setstatus(rs.getString("status"));
+
+        // Convert string to enum
+        String statusStr = rs.getString("status");
+        try {
+            interview.setstatus(Enums.interviewStatus.valueOf(statusStr));
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid interview status: " + statusStr);
+            interview.setstatus(Enums.interviewStatus.SCHEDULED); // Default value
+        }
 
         return interview;
     }

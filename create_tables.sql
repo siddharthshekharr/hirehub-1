@@ -1,11 +1,6 @@
---- Create Database
-CREATE DATABASE IF NOT EXISTS hirehub_db;
 USE hirehub_db;
 
---=======================================
 -- 1. Users Table (Internal Staff)
---=======================================
-
 CREATE TABLE users (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) UNIQUE NOT NULL,
@@ -123,4 +118,4 @@ CREATE TABLE candidate_answers (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (application_id) REFERENCES applications(application_id),
     FOREIGN KEY (question_id) REFERENCES screening_questions(question_id)
-);
+); 

@@ -1,4 +1,5 @@
 package com.hirehub;
+
 import com.hirehub.model.Candidates;
 import com.hirehub.model.Interviews;
 import com.hirehub.model.Job;
@@ -20,23 +21,23 @@ public class Main {
     private static final InterviewsService interviewsService = new InterviewsService();
     private static final OffersService offersService = new OffersService();
 
-    //displays main menu where user can choose section to manage
+    // displays main menu where user can choose section to manage
     public static void main(String[] args) {
         System.out.println("Welcome to Hirehub!");
         boolean running = true;
 
         while (running) {
             displayMainMenu();
-            
+
             int choice = getIntInput("Enter your choice: ");
-            
+
             switch (choice) {
-                case 1 -> handleJobOperations();
-                case 2 -> handleCandidateOperations();
-                case 3 -> handleApplicationOperations();
-                case 4 -> handleInterviewOperations();
-                case 5 -> handleOfferOperations();
-                case 6 -> handleUserOperations();
+                case 1 -> handleCandidateOperations();
+                case 2 -> handleJobOperations();
+                case 3 -> handleInterviewOperations();
+                case 4 -> handleApplicationOperations();
+                case 5 -> handleUserOperations();
+                case 6 -> handleOfferOperations();
                 case 7 -> {
                     System.out.println("Thank you for using Hirehub!");
                     running = false;
@@ -45,7 +46,8 @@ public class Main {
             }
         }
     }
-    //integer input, to ensure valid integer or prompts if invalid
+
+    // integer input, to ensure valid integer or prompts if invalid
     private static int getIntInput(String prompt) {
         System.out.print(prompt);
         while (!scanner.hasNextInt()) {
@@ -55,7 +57,7 @@ public class Main {
         return scanner.nextInt();
     }
 
-    //main menu options to the console
+    // main menu options to the console
     private static void displayMainMenu() {
         System.out.println("HireHub Main Menu");
         System.out.println("1. Candidate Management");
@@ -81,7 +83,7 @@ public class Main {
             int choice = getIntInput("Enter your choice: ");
             try {
                 switch (choice) {
-                    //CRUD operations, methods handle actions
+                    // CRUD operations, methods handle actions
                     case 1 -> createJob();
                     case 2 -> viewAllJobs();
                     case 3 -> viewById();
@@ -89,7 +91,7 @@ public class Main {
                     case 5 -> deleteJob();
                     case 6 -> {
                         return;
-                     } // Exit job management
+                    } // Exit job management
                     default -> System.out.println("Invalid choice. Please try again.");
                 }
             } catch (Exception e) {
@@ -117,9 +119,9 @@ public class Main {
                     case 3 -> updateCandidate();
                     case 4 -> deleteCandidate();
                     case 5 -> findById();
-                    case 6 -> { 
+                    case 6 -> {
                         return;
-                     } // Exit candidate management
+                    } // Exit candidate management
                     default -> System.out.println("Invalid choice. Please try again.");
                 }
             } catch (Exception e) {
@@ -149,7 +151,7 @@ public class Main {
                     case 5 -> findUserById();
                     case 6 -> {
                         return;
-                     } // Exit user management
+                    } // Exit user management
                     default -> System.out.println("Invalid choice. Please try again.");
                 }
             } catch (Exception e) {
@@ -177,9 +179,9 @@ public class Main {
                     case 3 -> updateInterview();
                     case 4 -> deleteInterview();
                     case 5 -> findInterview();
-                    case 6 -> { 
+                    case 6 -> {
                         return;
-                     } // Exit interview management
+                    } // Exit interview management
                     default -> System.out.println("Invalid choice. Please try again.");
                 }
             } catch (Exception e) {
@@ -209,7 +211,7 @@ public class Main {
                     case 5 -> findApplication();
                     case 6 -> {
                         return;
-                     } // Exit application management
+                    } // Exit application management
                     default -> System.out.println("Invalid choice. Please try again.");
                 }
             } catch (Exception e) {
@@ -220,38 +222,38 @@ public class Main {
 
     // Offer operations
     private static void handleOfferOperations() {
-        while (true) {   
-        System.out.println("\n === Offer Management ===");
-        System.out.println("1. Create Offer");
-        System.out.println("2. View all Offers");
-        System.out.println("3. Update Offer");
-        System.out.println("4. Delete Offer");
-        System.out.println("5. Find Offer");
-        System.out.println("6. Return to Main Menu");
+        while (true) {
+            System.out.println("\n === Offer Management ===");
+            System.out.println("1. Create Offer");
+            System.out.println("2. View all Offers");
+            System.out.println("3. Update Offer");
+            System.out.println("4. Delete Offer");
+            System.out.println("5. Find Offer");
+            System.out.println("6. Return to Main Menu");
 
-        int choice = getIntInput("Enter your choice: ");
-        try {
-            switch (choice) {
-                case 1 -> createOffer();
-                case 2 -> viewAllOffers();
-                case 3 -> updateOffer();
-                case 4 -> deleteOffer();
-                case 5 -> findOffer();
-                case 6 -> {
-                    return;
-                } // Exit application management
-                default -> System.out.println("Invalid choice. Please try again.");
+            int choice = getIntInput("Enter your choice: ");
+            try {
+                switch (choice) {
+                    case 1 -> createOffer();
+                    case 2 -> viewAllOffers();
+                    case 3 -> updateOffer();
+                    case 4 -> deleteOffer();
+                    case 5 -> findOffer();
+                    case 6 -> {
+                        return;
+                    } // Exit application management
+                    default -> System.out.println("Invalid choice. Please try again.");
+                }
+            } catch (Exception e) {
+                e.printStackTrace(); // Or some other logging method
             }
-        } catch (Exception e) {
-            e.printStackTrace(); // Or some other logging method
         }
     }
-}
 
-    //Job logic 
+    // Job logic
 
     private static void createJob() {
-    
+
     }
 
     private static void viewAllJobs() {
@@ -270,113 +272,128 @@ public class Main {
 
     }
 
-     //Candidate logic
+    // Candidate logic
 
-     private static void createCandidate() {
-    
-     }
- 
-     private static void viewAllCandidates() {
- 
-     }
- 
-     private static void updateCandidate() {
- 
-     }
- 
-     private static void deleteCandidate() {
- 
-     }
- 
-     private static void findById() {
-     }
+    private static void createCandidate() {
+        scanner.nextLine(); // Clear buffer
+        System.out.println("Enter Candidate first name");
+        String firstName = scanner.nextLine();
+        System.out.println("Enter Candidate last name");
+        String lastName = scanner.nextLine();
+        System.out.println("Enter Candidate email address");
+        String email = scanner.nextLine();
+        System.out.println("Enter Candidate phone number");
+        String phoneNumber = scanner.nextLine();
+        System.out.println("Enter Candidate resume URL (optional)");
+        String resumeUrl = scanner.nextLine();
 
+        Candidates candidate = new Candidates(firstName, lastName, email, phoneNumber);
+        if (!resumeUrl.isEmpty()) {
+            candidate.setresumeURL(resumeUrl);
+        }
 
-     //User logic
+        candidateService.createCandidate(candidate);
+        System.out.println("Candidate created successfully! ID: " + candidate.getId());
+    }
 
-     private static void createUser() {
-    
-     }
- 
-     private static void viewAllUsers() {
- 
-     }
- 
-     private static void updateUser() {
- 
-     }
- 
-     private static void deleteUser() {
- 
-     }
- 
-     private static void findUserById() {
-     }
+    private static void viewAllCandidates() {
 
-     //Interview logic 
+    }
 
-     private static void createInterview() {
-    
-     }
- 
-     private static void viewAllInterviews() {
- 
-     }
- 
-     private static void updateInterview() {
- 
-     }
- 
-     private static void deleteInterview() {
- 
-     }
- 
-     private static void findInterview() {
-     }
+    private static void updateCandidate() {
 
-     //Application logic 
+    }
 
-     private static void createApplication() {
-    
-     }
- 
-     private static void viewAllApplications() {
- 
-     }
- 
-     private static void updateApplication() {
- 
-     }
- 
-     private static void deleteApplication() {
- 
-     }
- 
-     private static void findApplication() {
-     }
+    private static void deleteCandidate() {
 
-     //Offer logic
+    }
 
-     private static void createOffer() {
-    
-     }
- 
-     private static void viewAllOffers() {
- 
-     }
- 
-     private static void updateOffer() {
- 
-     }
- 
-     private static void deleteOffer() {
- 
-     }
- 
-     private static void findOffer() {
-     }
+    private static void findById() {
+    }
 
+    // User logic
 
+    private static void createUser() {
+
+    }
+
+    private static void viewAllUsers() {
+
+    }
+
+    private static void updateUser() {
+
+    }
+
+    private static void deleteUser() {
+
+    }
+
+    private static void findUserById() {
+    }
+
+    // Interview logic
+
+    private static void createInterview() {
+
+    }
+
+    private static void viewAllInterviews() {
+
+    }
+
+    private static void updateInterview() {
+
+    }
+
+    private static void deleteInterview() {
+
+    }
+
+    private static void findInterview() {
+    }
+
+    // Application logic
+
+    private static void createApplication() {
+
+    }
+
+    private static void viewAllApplications() {
+
+    }
+
+    private static void updateApplication() {
+
+    }
+
+    private static void deleteApplication() {
+
+    }
+
+    private static void findApplication() {
+    }
+
+    // Offer logic
+
+    private static void createOffer() {
+
+    }
+
+    private static void viewAllOffers() {
+
+    }
+
+    private static void updateOffer() {
+
+    }
+
+    private static void deleteOffer() {
+
+    }
+
+    private static void findOffer() {
+    }
 
     private static void addJob() {
         System.out.println("Create new job");
@@ -394,6 +411,7 @@ public class Main {
     }
 
     private static void addCandidate() {
+        scanner.nextLine(); // Clear buffer
         System.out.println("Add new Candidate");
         System.out.println("Enter Candidate first name");
         String firstName = scanner.nextLine();
@@ -402,17 +420,17 @@ public class Main {
         System.out.println("Enter Candidate email address");
         String email = scanner.nextLine();
         System.out.println("Enter Candidate phone number");
-        int phoneNumber = scanner.nextInt();
-        System.out.println("Enter Candidate resume URL");
+        String phoneNumber = scanner.nextLine();
+        System.out.println("Enter Candidate resume URL (optional)");
         String resumeUrl = scanner.nextLine();
-        System.out.println("Enter Candidate ID");
-        int id = scanner.nextInt();
 
-        Candidates candidate = new Candidates(id, resumeUrl, firstName, lastName, email, phoneNumber, resumeUrl, null);
+        Candidates candidate = new Candidates(firstName, lastName, email, phoneNumber);
+        if (!resumeUrl.isEmpty()) {
+            candidate.setresumeURL(resumeUrl);
+        }
+
         candidateService.createCandidate(candidate);
-        System.out.println("Candidate created successfully!" + candidate.getId());
-
-
+        System.out.println("Candidate created successfully! ID: " + candidate.getId());
     }
 
     private static void addUsers() {
@@ -457,30 +475,28 @@ public class Main {
         Interviews interview = new Interviews(interviewID, applicationID, null, feedback, feedback);
         interviewsService.createInterviews();
 
-    
-                
-        //job CRUD
+        // job CRUD
         JobService jobService = new JobService();
 
-        //Create a new job
-        Job newJob = new Job("Software Developer", "Develops application", "Java", new Date(), new Date(),  "Open");
+        // Create a new job
+        Job newJob = new Job("Software Developer", "Develops application", "Java", new Date(), new Date(), "Open");
         jobService.createJob(newJob);
         System.out.println("New job created with ID: " + newJob.getId());
 
-        //get all jobs
+        // get all jobs
         List<Job> allJobs = jobService.getAllJobs();
         System.out.println("All jobs");
 
-        for (Job job: allJobs) {
+        for (Job job : allJobs) {
             System.out.println(job);
-    }
+        }
 
-        //get a specific job and store it in Job type in variable called retrievedJob
+        // get a specific job and store it in Job type in variable called retrievedJob
         Job retrievedJob = jobService.getJobById(newJob.getId());
         System.out.println("Retrieved job: " + retrievedJob);
 
-        //Delete the job
+        // Delete the job
         jobService.deleteJob(newJob.getId());
 
-}
+    }
 }

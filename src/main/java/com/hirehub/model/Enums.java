@@ -18,6 +18,8 @@ public class Enums {
         ADMIN, RECRUITER, HIRING_MANAGER, INTERVIEWER
     }
 
-
-    
+    // Added for backward compatibility with existing code
+    public enum candidatesStatus {
+        ACTIVE, INACTIVE, BLACKLISTED, UNKNOWN
+    }
 }
